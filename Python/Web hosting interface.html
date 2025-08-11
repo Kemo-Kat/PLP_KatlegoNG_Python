@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HostPro - Client Portfolio Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --success: #2ecc71;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--secondary);
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            width: 300px;
+        }
+        
+        .search-bar input {
+            border: none;
+            outline: none;
+            flex: 1;
+            padding: 5px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Client Portfolio Section */
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+        
+        .client-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .client-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .client-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .client-header {
+            height: 120px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            position: relative;
+        }
+        
+        .client-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: white;
+            position: absolute;
+            bottom: -30px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            font-size: 24px;
+            color: var(--primary);
+        }
+        
+        .client-body {
+            padding: 40px 20px 20px;
+        }
+        
+        .client-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .client-domain {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .client-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        /* Client Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-close {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .client-detail-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .detail-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background: #f1f1f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 32px;
+            color: var(--primary);
+        }
+        
+        .detail-info h2 {
+            margin: 0;
+            color: var(--secondary);
+        }
+        
+        .detail-info p {
+            margin: 5px 0 0;
+            color: #7f8c8d;
+        }
+        
+        .detail-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-btn.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-weight: 500;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-suspended {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-expired {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .client-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>HostPro</h2>
+                <p>Client Portfolio Manager</p>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-server"></i>
+                    <span>Hosting</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-globe"></i>
+                    <span>Domains</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Billing</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Clients</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search clients...">
+                </div>
+                
+                <div class="user-profile">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                    <span>Admin User</span>
+                </div>
+            </div>
+            
+            <h2 class="section-title">Client Portfolios</h2>
+            
+            <div class="client-filters">
+                <div class="filter-btn active">All Clients</div>
+                <div class="filter-btn">Active</div>
+                <div class="filter-btn">Suspended</div>
+                <div class="filter-btn">Expired</div>
+                <div class="filter-btn">Recent</div>
+            </div>
+            
+            <div class="client-grid">
+                <!-- Client Card 1 -->
+                <div class="client-card" onclick="openClientModal('client1')">
+                    <div class="client-header" style="background: linear-gradient(135deg, #3498db, #2c3e50);">
+                        <div class="client-logo">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                    </div>
+                    <div class="client-body">
+                        <h3 class="client-name">Elegant Boutique</h3>
+                        <p class="client-domain">elegantboutique.com</p>
+                        <div class="client-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">2.5GB</div>
+                                <div class="stat-label">Storage</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Premium</div>
+                                <div class="stat-label">Plan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value status-badge status-active">Active</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Card 2 -->
+                <div class="client-card" onclick="openClientModal('client2')">
+                    <div class="client-header" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                        <div class="client-logo">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                    </div>
+                    <div class="client-body">
+                        <h3 class="client-name">Urban Eats</h3>
+                        <p class="client-domain">urbaneats.co</p>
+                        <div class="client-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">5GB</div>
+                                <div class="stat-label">Storage</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Business</div>
+                                <div class="stat-label">Plan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value status-badge status-suspended">Suspended</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Card 3 -->
+                <div class="client-card" onclick="openClientModal('client3')">
+                    <div class="client-header" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                        <div class="client-logo">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                    </div>
+                    <div class="client-body">
+                        <h3 class="client-name">Green Life</h3>
+                        <p class="client-domain">greenlife.org</p>
+                        <div class="client-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">10GB</div>
+                                <div class="stat-label">Storage</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Enterprise</div>
+                                <div class="stat-label">Plan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value status-badge status-active">Active</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Card 4 -->
+                <div class="client-card" onclick="openClientModal('client4')">
+                    <div class="client-header" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                        <div class="client-logo">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                    </div>
+                    <div class="client-body">
+                        <h3 class="client-name">Creative Minds</h3>
+                        <p class="client-domain">creativeminds.design</p>
+                        <div class="client-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">1GB</div>
+                                <div class="stat-label">Storage</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Basic</div>
+                                <div class="stat-label">Plan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value status-badge status-expired">Expired</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Card 5 -->
+                <div class="client-card" onclick="openClientModal('client5')">
+                    <div class="client-header" style="background: linear-gradient(135deg, #f39c12, #d35400);">
+                        <div class="client-logo">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    <div class="client-body">
+                        <h3 class="client-name">EduTech Solutions</h3>
+                        <p class="client-domain">edutechsolutions.edu</p>
+                        <div class="client-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">20GB</div>
+                                <div class="stat-label">Storage</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Enterprise</div>
+                                <div class="stat-label">Plan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value status-badge status-active">Active</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Card 6 -->
+                <div class="client-card" onclick="openClientModal('client6')">
+                    <div class="client-header" style="background: linear-gradient(135deg, #1abc9c, #16a085);">
+                        <div class="client-logo">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                    </div>
+                    <div class="client-body">
+                        <h3 class="client-name">HealthPlus</h3>
+                        <p class="client-domain">healthplus.med</p>
+                        <div class="client-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">15GB</div>
+                                <div class="stat-label">Storage</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Business</div>
+                                <div class="stat-label">Plan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value status-badge status-active">Active</div>
+                                <div class="stat-label">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Client Detail Modal -->
+    <div class="modal" id="clientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Client Details</h3>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="client-detail-header">
+                    <div class="detail-logo" id="detailLogo">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="detail-info">
+                        <h2 id="detailName">Elegant Boutique</h2>
+                        <p id="detailDomain">elegantboutique.com</p>
+                        <span class="status-badge status-active" id="detailStatus">Active</span>
+                    </div>
+                </div>
+                
+                <div class="detail-tabs">
+                    <div class="tab-btn active" onclick="switchTab('overview')">Overview</div>
+                    <div class="tab-btn" onclick="switchTab('hosting')">Hosting</div>
+                    <div class="tab-btn" onclick="switchTab('domain')">Domain</div>
+                    <div class="tab-btn" onclick="switchTab('billing')">Billing</div>
+                    <div class="tab-btn" onclick="switchTab('support')">Support</div>
+                </div>
+                
+                <!-- Overview Tab -->
+                <div class="tab-content active" id="overviewTab">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Client Since</div>
+                            <div class="info-value" id="clientSince">June 12, 2020</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Plan</div>
+                            <div class="info-value" id="clientPlan">Premium Hosting</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Billing Cycle</div>
+                            <div class="info-value" id="billingCycle">Annual</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Next Due Date</div>
+                            <div class="info-value" id="dueDate">June 12, 2023</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Storage Used</div>
+                            <div class="info-value" id="storageUsed">2.5GB of 10GB</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Bandwidth</div>
+                            <div class="info-value" id="bandwidth">Unmetered</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email Accounts</div>
+                            <div class="info-value" id="emailAccounts">15/50</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Databases</div>
+                            <div class="info-value" id="databases">5/25</div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 30px;">Recent Activity</h4>
+                    <div class="info-item" style="margin-top: 10px;">
+                        <div class="info-label">Last Backup</div>
+                        <div class="info-value">May 15, 2023 - 2:45 AM</div>
+                    </div>
+                    <div class="info-item" style="margin-top: 10px;">
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value">May 20, 2023 - 10:32 AM</div>
+                    </div>
+                </div>
+                
+                <!-- Hosting Tab -->
+                <div class="tab-content" id="hostingTab">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Server IP</div>
+                            <div class="info-value">192.168.45.123</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Nameservers</div>
+                            <div class="info-value">ns1.hostpro.com<br>ns2.hostpro.com</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">PHP Version</div>
+                            <div class="info-value">8.1</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">MySQL Version</div>
+                            <div class="info-value">5.7</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">cPanel Version</div>
+                            <div class="info-value">102.0.12</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">SSL Certificate</div>
+                            <div class="info-value">Let's Encrypt (Valid until Aug 30, 2023)</div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 30px;">Quick Actions</h4>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button style="padding: 8px 15px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-sync-alt"></i> Restart
+                        </button>
+                        <button style="padding: 8px 15px; background: var(--success); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-lock"></i> Change Password
+                        </button>
+                        <button style="padding: 8px 15px; background: #f39c12; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-wrench"></i> Repair
+                        </button>
+                        <button style="padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-trash"></i> Terminate
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Domain Tab -->
+                <div class="tab-content" id="domainTab">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Domain Name</div>
+                            <div class="info-value">elegantboutique.com</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Registration Date</div>
+                            <div class="info-value">June 10, 2020</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Expiry Date</div>
+                            <div class="info-value">June 10, 2023</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Auto-Renew</div>
+                            <div class="info-value">Enabled</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Registrar</div>
+                            <div class="info-value">HostPro Domains</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">DNS Management</div>
+                            <div class="info-value">HostPro DNS</div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 30px;">DNS Records</h4>
+                    <div style="margin-top: 15px; overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f1f1f1;">
+                                    <th style="padding: 10px; text-align: left;">Type</th>
+                                    <th style="padding: 10px; text-align: left;">Name</th>
+                                    <th style="padding: 10px; text-align: left;">Value</th>
+                                    <th style="padding: 10px; text-align: left;">TTL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">A</td>
+                                    <td style="padding: 10px;">@</td>
+                                    <td style="padding: 10px;">192.168.45.123</td>
+                                    <td style="padding: 10px;">14400</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">CNAME</td>
+                                    <td style="padding: 10px;">www</td>
+                                    <td style="padding: 10px;">elegantboutique.com</td>
+                                    <td style="padding: 10px;">14400</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">MX</td>
+                                    <td style="padding: 10px;">@</td>
+                                    <td style="padding: 10px;">mail.elegantboutique.com</td>
+                                    <td style="padding: 10px;">14400</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Billing Tab -->
+                <div class="tab-content" id="billingTab">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Billing Cycle</div>
+                            <div class="info-value">Annual</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Next Invoice</div>
+                            <div class="info-value">June 12, 2023 - $119.40</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Payment Method</div>
+                            <div class="info-value">Credit Card (VISA ****4242)</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Last Payment</div>
+                            <div class="info-value">June 12, 2022 - $119.40</div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 30px;">Recent Invoices</h4>
+                    <div style="margin-top: 15px; overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f1f1f1;">
+                                    <th style="padding: 10px; text-align: left;">Invoice #</th>
+                                    <th style="padding: 10px; text-align: left;">Date</th>
+                                    <th style="padding: 10px; text-align: left;">Amount</th>
+                                    <th style="padding: 10px; text-align: left;">Status</th>
+                                    <th style="padding: 10px; text-align: left;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">INV-2022-0012</td>
+                                    <td style="padding: 10px;">June 12, 2022</td>
+                                    <td style="padding: 10px;">$119.40</td>
+                                    <td style="padding: 10px;"><span class="status-badge status-active">Paid</span></td>
+                                    <td style="padding: 10px;"><a href="#" style="color: var(--primary);">Download</a></td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">INV-2021-0012</td>
+                                    <td style="padding: 10px;">June 12, 2021</td>
+                                    <td style="padding: 10px;">$119.40</td>
+                                    <td style="padding: 10px;"><span class="status-badge status-active">Paid</span></td>
+                                    <td style="padding: 10px;"><a href="#" style="color: var(--primary);">Download</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Support Tab -->
+                <div class="tab-content" id="supportTab">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Open Tickets</div>
+                            <div class="info-value">1</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Last Ticket</div>
+                            <div class="info-value">May 5, 2023 - "Email configuration"</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Ticket Response Time</div>
+                            <div class="info-value">Average: 2 hours 15 minutes</div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="margin-top: 30px;">Recent Tickets</h4>
+                    <div style="margin-top: 15px; overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f1f1f1;">
+                                    <th style="padding: 10px; text-align: left;">Ticket #</th>
+                                    <th style="padding: 10px; text-align: left;">Subject</th>
+                                    <th style="padding: 10px; text-align: left;">Date</th>
+                                    <th style="padding: 10px; text-align: left;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">TKT-2023-0045</td>
+                                    <td style="padding: 10px;">Email configuration issues</td>
+                                    <td style="padding: 10px;">May 5, 2023</td>
+                                    <td style="padding: 10px;"><span class="status-badge status-active">Open</span></td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">TKT-2023-0021</td>
+                                    <td style="padding: 10px;">SSL certificate renewal</td>
+                                    <td style="padding: 10px;">March 12, 2023</td>
+                                    <td style="padding: 10px;"><span class="status-badge status-active">Closed</span></td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">TKT-2022-0112</td>
+                                    <td style="padding: 10px;">Website migration request</td>
+                                    <td style="padding: 10px;">December 3, 2022</td>
+                                    <td style="padding: 10px;"><span class="status-badge status-active">Closed</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <button style="margin-top: 20px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-plus"></i> Create New Ticket
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sample client data
+        const clients = {
+            client1: {
+                name: "Elegant Boutique",
+                domain: "elegantboutique.com",
+                status: "active",
+                icon: "shopping-bag",
+                color: "linear-gradient(135deg, #3498db, #2c3e50)",
+                details: {
+                    clientSince: "June 12, 2020",
+                    plan: "Premium Hosting",
+                    billingCycle: "Annual",
+                    dueDate: "June 12, 2023",
+                    storageUsed: "2.5GB of 10GB",
+                    bandwidth: "Unmetered",
+                    emailAccounts: "15/50",
+                    databases: "5/25"
+                }
+            },
+            client2: {
+                name: "Urban Eats",
+                domain: "urbaneats.co",
+                status: "suspended",
+                icon: "utensils",
+                color: "linear-gradient(135deg, #e74c3c, #c0392b)",
+                details: {
+                    clientSince: "March 5, 2021",
+                    plan: "Business Hosting",
+                    billingCycle: "Monthly",
+                    dueDate: "April 15, 2023",
+                    storageUsed: "5GB of 20GB",
+                    bandwidth: "Unmetered",
+                    emailAccounts: "25/100",
+                    databases: "10/50"
+                }
+            },
+            client3: {
+                name: "Green Life",
+                domain: "greenlife.org",
+                status: "active",
+                icon: "leaf",
+                color: "linear-gradient(135deg, #2ecc71, #27ae60)",
+                details: {
+                    clientSince: "January 15, 2019",
+                    plan: "Enterprise Hosting",
+                    billingCycle: "Annual",
+                    dueDate: "January 15, 2024",
+                    storageUsed: "10GB of 50GB",
+                    bandwidth: "Unmetered",
+                    emailAccounts: "45/Unlimited",
+                    databases: "20/Unlimited"
+                }
+            },
+            client4: {
+                name: "Creative Minds",
+                domain: "creativeminds.design",
+                status: "expired",
+                icon: "paint-brush",
+                color: "linear-gradient(135deg, #9b59b6, #8e44ad)",
+                details: {
+                    clientSince: "October 22, 2022",
+                    plan: "Basic Hosting",
+                    billingCycle: "Monthly",
+                    dueDate: "April 22, 2023",
+                    storageUsed: "1GB of 5GB",
+                    bandwidth: "100GB",
+                    emailAccounts: "5/10",
+                    databases: "2/5"
+                }
+            },
+            client5: {
+                name: "EduTech Solutions",
+                domain: "edutechsolutions.edu",
+                status: "active",
+                icon: "graduation-cap",
+                color: "linear-gradient(135deg, #f39c12, #d35400)",
+                details: {
+                    clientSince: "August 3, 2018",
+                    plan: "Enterprise Hosting",
+                    billingCycle: "Biennial",
+                    dueDate: "August 3, 2024",
+                    storageUsed: "20GB of 100GB",
+                    bandwidth: "Unmetered",
+                    emailAccounts: "75/Unlimited",
+                    databases: "35/Unlimited"
+                }
+            },
+            client6: {
+                name: "HealthPlus",
+                domain: "healthplus.med",
+                status: "active",
+                icon: "heartbeat",
+                color: "linear-gradient(135deg, #1abc9c, #16a085)",
+                details: {
+                    clientSince: "November 17, 2021",
+                    plan: "Business Hosting",
+                    billingCycle: "Annual",
+                    dueDate: "November 17, 2023",
+                    storageUsed: "15GB of 30GB",
+                    bandwidth: "Unmetered",
+                    emailAccounts: "40/150",
+                    databases: "15/75"
+                }
+            }
+        };
+        
+        // Open client modal
+        function openClientModal(clientId) {
+            const client = clients[clientId];
+            const modal = document.getElementById('clientModal');
+            
+            // Set client details
+            document.getElementById('detailName').textContent = client.name;
+            document.getElementById('detailDomain').textContent = client.domain;
+            
+            // Set logo
+            const logo = document.getElementById('detailLogo');
+            logo.innerHTML = `<i class="fas fa-${client.icon}"></i>`;
+            
+            // Set status
+            const status = document.getElementById('detailStatus');
+            status.textContent = client.status.charAt(0).toUpperCase() + client.status.slice(1);
+            status.className = 'status-badge';
+            status.classList.add(`status-${client.status}`);
+            
+            // Set details
+            for (const [key, value] of Object.entries(client.details)) {
+                const element = document.getElementById(key);
+                if (element) element.textContent = value;
+            }
+            
+            // Show modal
+            modal.style.display = 'flex';
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('clientModal').style.display = 'none';
+        }
+        
+        // Switch tabs
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.getElementById(`${tabId}Tab`).classList.add('active');
+            
+            // Activate button
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('clientModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
